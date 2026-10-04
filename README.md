@@ -1,9 +1,9 @@
 # pr-note
 
 A small JavaScript Action that posts **Thanks for the pull request!** in response
-to a human's new comment on a pull request. This is the producer for GitHub
-Universe **TRU1556M**, a **pre-recorded, Steve-narrated, entirely harmless** controls
-demo. It is not an actual supply-chain attack or a security certification.
+to a human's new comment on a pull request. This repository is the producer
+for a harmless GitHub Actions controls demo, not an actual supply-chain attack
+or a security certification.
 
 ## Action contract
 
@@ -78,7 +78,7 @@ against a local loopback mock, never GitHub or real credentials.
 | `demo/policies/release-only-steve.json` | Desired repository actor policy; not automatically discovered configuration. |
 
 The defaults checkout job stops after checkout: no `npm ci`, tests, local actions,
-or other execution of its result. Greg's earlier attack illustration included
+or other execution of its result. The display-only attack model includes
 execution commands; this controls-only fixture deliberately does not.
 Its cache job uses trusted inline text, an ephemeral hosted runner, and a unique
 `universe-tru1556m-default-<run_id>-<attempt>` key. It deliberately leaves

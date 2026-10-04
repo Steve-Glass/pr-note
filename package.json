@@ -2,7 +2,7 @@
   "name": "pr-note",
   "version": "3.0.1",
   "private": true,
-  "description": "Harmless pull request note Action for the TRU1556M recorded demo",
+  "description": "Harmless pull request note Action for a GitHub Actions controls demo",
   "type": "module",
   "engines": {
     "node": ">=24"

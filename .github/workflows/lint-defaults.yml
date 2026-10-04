@@ -21,7 +21,7 @@ jobs:
       - name: Prepare disposable trusted text
         run: |
           mkdir -p "$RUNNER_TEMP/universe-cache-probe"
-          printf 'Harmless TRU1556M cache-default probe.\n' > "$RUNNER_TEMP/universe-cache-probe/note.txt"
+          printf 'Harmless cache-default probe.\n' > "$RUNNER_TEMP/universe-cache-probe/note.txt"
       - name: Attempt cache save under platform default
         uses: actions/cache/save@v5
         with:

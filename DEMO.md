@@ -1,8 +1,8 @@
-# TRU1556M recording runbook
+# Demo recording runbook
 
-**Pre-recorded, Steve narrates. No actual attack.** Record separate clips, not
-timed live choreography. Repository code is staged illustration; hosted control
-behavior is measured only when real run logs/annotations show it.
+Record separate clips using harmless inputs; do not perform an actual attack.
+Repository code illustrates the setup. Claim hosted control behavior only
+when real run logs or annotations demonstrate it.
 
 Full-version tags are non-retagged by the demo's release helper and operating
 convention, not by platform-enforced release immutability. Published `v3.0.0`
@@ -33,7 +33,7 @@ Use Node 24, local authenticated `gh`, and a private receipt directory outside
 the checkout. Substitute an explicit absolute path for `STATE`:
 
 ```sh
-export STATE=/absolute/path/outside/checkout/tru1556m
+export STATE=/absolute/path/outside/checkout/pr-note-demo
 node demo/preflight.mjs
 npm ci && npm test && npm run check:bundle
 node demo/settings.mjs policy preview "$STATE/policy.json"
@@ -176,7 +176,7 @@ second **otherwise dispatch-eligible** identity arranged with explicit approval.
 manual checks and Policy insights where available.
 **Narration:** "This policy allows only me to trigger this release workflow.
 It doesn't determine what code does after an allowed trigger."
-**Expected:** Steve's fixed harmless check runs; the eligible second actor is
+**Expected:** the allowed account's fixed harmless check runs; the eligible second actor is
 denied by this policy, with no publishing in either dispatch.
 **Observed evidence:** blocked by missing second identity; basic access denial
 from an outsider is not policy evidence. Do not grant access automatically.

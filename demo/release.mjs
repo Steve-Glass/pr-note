@@ -85,7 +85,7 @@ async function main() {
     if (change.release) {
       gh(['release', 'create', change.release, '--repo', REPO, '--verify-tag', '--target', sha,
         '--title', `${change.release} (benign revision ${revision})`,
-        '--notes', `TRU1556M harmless PR note. demo-revision: ${revision}.`]);
+        '--notes', `Harmless PR note. demo-revision: ${revision}.`]);
     } else {
       if (change.endpoint.endsWith('/tags/v3') || change.body?.ref === 'refs/tags/v3') {
         const target = api(`repos/${REPO}/git/ref/tags/${plan.tag}`);
