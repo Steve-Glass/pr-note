@@ -105,11 +105,17 @@ publishing. Manual `workflow_dispatch` runs only a fixed `printf` job with
 and local application.
 
 `node demo/release.mjs --preview` prints exact tag/release mutations for a clean,
-committed candidate. `release.yml` alone calls `--apply`: create immutable version
+committed candidate. `release.yml` alone calls `--apply`: create the full-version
 tag, create release, then advance `v3` after target validation. Reruns resume a
-partial same-SHA release or do nothing when complete; conflicting immutable tags,
+partial same-SHA release or do nothing when complete; conflicting full-version tags,
 drafts, unexpected alias values and stale-main attempts fail. Errors are not
 hidden. GitHub tag/ruleset restrictions still apply.
+
+Published version `v3.0.0` points to reviewed A,
+`a53b99fc9738713d0a1d0dba397606f0f0352a98`. Full-version tags are non-retagged
+by this demo's release helper and operating convention. GitHub reports release
+`v3.0.0` as `immutable: false`; platform-enforced release immutability is not
+enabled or demonstrated. Only `v3` is intentionally movable.
 
 Keep A on the published implementation branch and as an ancestor of B on `main`.
 Do not force-push away that history. **B must wait until the consumer confirms it

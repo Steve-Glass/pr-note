@@ -4,6 +4,11 @@
 timed live choreography. Repository code is staged illustration; hosted control
 behavior is measured only when real run logs/annotations show it.
 
+Full-version tags are non-retagged by the demo's release helper and operating
+convention, not by platform-enforced release immutability. Published `v3.0.0`
+points to reviewed A, `a53b99fc9738713d0a1d0dba397606f0f0352a98`, and its
+release API reports `immutable: false`. Only `v3` is intentionally movable.
+
 ## Current checkpoints
 
 | Checkpoint | Status and evidence |
@@ -48,7 +53,7 @@ The concrete setup preview is:
 | Resource | Approved mutation would do |
 | --- | --- |
 | Producer code on `main` | Fast-forward reviewed A commit to main; its `release: v3.0.0` subject triggers release publishing. Session-branch push alone does not publish. |
-| A publication | POST `git/refs` for immutable `refs/tags/v3.0.0` at A; `gh release create v3.0.0 --verify-tag`; POST `git/refs` for `refs/tags/v3` at A. |
+| A publication | POST `git/refs` for full-version tag `refs/tags/v3.0.0` at A; `gh release create v3.0.0 --verify-tag`; POST `git/refs` for `refs/tags/v3` at A. |
 | Release policy | POST `/repos/Steve-Glass/pr-note/actions/policies` with the exact body in `demo/policies/release-only-steve.json`; no other policies changed. |
 | Fork approval | PUT `/repos/Steve-Glass/pr-note/actions/permissions/fork-pr-contributor-approval` with `{"approval_policy":"all_external_contributors"}`; prior value observed: `first_time_contributors`. |
 | Harmless rehearsals | Separately approve real fork/PR/comment creation and release dispatches. No grants, events, or forks are produced by setup/tests. |
@@ -121,7 +126,7 @@ lint/release files outside `.github/workflows`. Show A's consumer output if read
 illustrate a trust-boundary mistake; I am not performing an attack."
 **Expected:** `demo-revision: A` with the unchanged thank-you comment.
 **Observed evidence:** local behavior verified; actual release and consumer run
-links pending. **Reset:** retain A's branch and immutable tag; never overwrite A.
+links pending. **Reset:** retain A's branch and full-version tag; never overwrite A.
 
 ## Clip 2: two independent secure defaults
 
@@ -207,10 +212,10 @@ control in the same branch scope, followed by restore under `cache-mode: none`.
 Keep that scaffolding outside the main release view. It is not implemented or
 claimed as measured here; a cold-cache miss is not proof of isolation.
 
-## Clip 6: immutable A handoff; stop before B
+## Clip 6: reviewed A handoff; stop before B
 
 **Initial state:** successful authorized A release and consumer onboarding.
-**Action / screen:** record immutable `v3.0.0`, mutable `v3`, reachable A branch,
+**Action / screen:** record published version `v3.0.0`, mutable `v3`, reachable A branch,
 producer run, and consumer's native lock plus successful A run.
 **Narration:** "Both tags resolve to A. The consumer locks this exact commit
 and has successfully executed it."
@@ -237,8 +242,8 @@ while the consumer still executes A, then its separate firewall probe.
 **Narration:** "I moved the alias to a second benign version. The lock keeps
 the consumer on A; its separate firewall check demonstrates containment without
 sending credentials."
-**Expected:** immutable `v3.0.0` remains A; `v3.0.1` and `v3` resolve to B;
+**Expected:** full-version tag `v3.0.0` remains A; `v3.0.1` and `v3` resolve to B;
 consumer's locked run still logs A.
 **Observed evidence:** blocked until the two explicit gates above; do not publish B now.
-**Reset:** keep both versions branch-reachable. Never retag immutable versions;
+**Reset:** keep both versions branch-reachable. Never retag full-version tags;
 any deliberate alias reset needs its own reviewed approval and readback.
