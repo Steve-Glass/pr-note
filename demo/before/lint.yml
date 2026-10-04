@@ -1,0 +1,16 @@
+# DISPLAY ONLY: hazardous attack MODEL, not an executable demo workflow.
+# Greg's earlier illustration executed PR code; our defaults fixture never does.
+name: Lint (before)
+on:
+  pull_request_target:
+    branches: [main]
+permissions: {}
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - run: npm ci && npm test

@@ -1,0 +1,42 @@
+name: Release
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+cache-mode: none
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  policy-check:
+    if: github.event_name == 'workflow_dispatch'
+    permissions: {}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harmless actor-policy check (never publishes)
+        run: printf 'Release actor policy allowed this harmless check; no publication.\n'
+
+  publish:
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      startsWith(github.event.head_commit.message, 'release: v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: npm ci && npm test
+      - run: npm run check:bundle
+      - name: Publish immutable version and advance v3
+        run: node demo/release.mjs --apply
+        env:
+          GH_TOKEN: ${{ github.token }}

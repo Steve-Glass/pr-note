@@ -1,0 +1,23 @@
+{
+  "name": "pr-note",
+  "version": "3.0.0",
+  "private": true,
+  "description": "Harmless pull request note Action for the TRU1556M recorded demo",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check:bundle": "node scripts/build.mjs --check",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@actions/core": "3.0.1",
+    "@actions/github": "9.1.1"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "0.45.0",
+    "yaml": "2.9.1"
+  }
+}

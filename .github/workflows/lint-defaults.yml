@@ -1,0 +1,29 @@
+name: Lint defaults (harmless protection fixture)
+on:
+  pull_request_target:
+    branches: [main]
+permissions: {}
+
+jobs:
+  checkout-protection:
+    runs-on: ubuntu-latest
+    steps:
+      # Deliberately recognizable hazardous checkout; NEVER execute its result.
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+  cache-default:
+    # Independent of checkout rejection; cache-mode deliberately unspecified.
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare disposable trusted text
+        run: |
+          mkdir -p "$RUNNER_TEMP/universe-cache-probe"
+          printf 'Harmless TRU1556M cache-default probe.\n' > "$RUNNER_TEMP/universe-cache-probe/note.txt"
+      - name: Attempt cache save under platform default
+        uses: actions/cache/save@v5
+        with:
+          path: ${{ runner.temp }}/universe-cache-probe
+          key: universe-tru1556m-default-${{ github.run_id }}-${{ github.run_attempt }}

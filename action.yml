@@ -1,0 +1,15 @@
+name: PR note
+description: Post a harmless thank-you note on a pull request comment.
+inputs:
+  token:
+    description: Token with permission to comment on the pull request.
+    required: true
+  body:
+    description: Comment to post.
+    default: Thanks for the pull request!
+outputs:
+  demo-revision:
+    description: Benign demo revision marker (initially A).
+runs:
+  using: node24
+  main: dist/index.js

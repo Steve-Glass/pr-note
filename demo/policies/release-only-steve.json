@@ -1,0 +1,23 @@
+{
+  "name": "universe-tru1556m-release-only-steve",
+  "enforcement": "active",
+  "conditions": {
+    "workflow_path": {
+      "include": [".github/workflows/release.yml"],
+      "exclude": []
+    }
+  },
+  "rules": [
+    {
+      "type": "restrict_actions_actors",
+      "parameters": {
+        "allowed_actors": [
+          {
+            "id": 84886334,
+            "type": "User"
+          }
+        ]
+      }
+    }
+  ]
+}
