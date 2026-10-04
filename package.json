@@ -1,6 +1,6 @@
 {
   "name": "pr-note",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "private": true,
   "description": "Harmless pull request note Action for the TRU1556M recorded demo",
   "type": "module",

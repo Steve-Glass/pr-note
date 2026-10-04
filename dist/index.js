@@ -37341,7 +37341,7 @@ function getOctokit(token, options, ...additionalPlugins) {
 /* harmony export */   eF: () => (/* binding */ run)
 /* harmony export */ });
 /* unused harmony exports DEMO_REVISION, DEFAULT_BODY */
-const DEMO_REVISION = 'A';
+const DEMO_REVISION = 'B';
 const DEFAULT_BODY = 'Thanks for the pull request!';
 
 async function run({ core, context, getOctokit }) {
