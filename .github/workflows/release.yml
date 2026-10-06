@@ -2,7 +2,6 @@ name: Release
 on:
   push:
     branches: [main]
-  workflow_dispatch:
 permissions:
   contents: write
 cache-mode: none
@@ -11,14 +10,6 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  policy-check:
-    if: github.event_name == 'workflow_dispatch'
-    permissions: {}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Harmless actor-policy check (never publishes)
-        run: printf 'Release actor policy allowed this harmless check; no publication.\n'
-
   publish:
     if: >-
       github.event_name == 'push' &&

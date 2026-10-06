@@ -29,7 +29,7 @@ explaining a control.
 | 1. Original model | `demo/before/lint.yml`: `pull_request_target`, explicit head `ref`, then the execution command. `demo/before/release.yml`: `cache: npm` and publishing authority. |
 | 2. Same configuration, secure defaults | `.github/workflows/lint-defaults.yml`: the **same trigger/ref**, then real checkout rejection. Separately show the independent cache job and its default-mode warning. |
 | 3. Default event WEP | Default policy's scope, **actual enforcement state**, `pull_request_target` restriction, and Policy insights if present. Brief optional inset: migration `lint.yml`. |
-| 4. Explicit actor WEP | Policy 6432: **active**, sole User **Steve-Glass / 84886334**, workflow include **`.github/workflows/release.yml`**, empty excludes. |
+| 4. Explicit actor WEP | Actions policies: policy 6432 **active**, sole User **Steve-Glass / 84886334**, workflow include **`.github/workflows/release.yml`**, empty excludes. Use **Policy insights** for actual denial evidence, not an in-workflow check. |
 | 5. Release cache mode | `.github/workflows/release.yml`: **`cache-mode: none`**; keep `contents: write` and setup-node's original Node 24 / `cache: npm` visible. Then setup/post warnings from the measured run. |
 | 6. Consumer CLI lock | Consumer's official CLI-generated lock and requested-versus-executed SHA evidence. Show the open mismatch instead of claiming success. |
 | 7. Independent external firewall | Consumer's separate network restriction and its own result, not a claimed consequence of locking. |
@@ -108,17 +108,19 @@ Do not spend this clip on contributor-approval settings or an approve/run flow.
 
 **Initial state:** active repository policy 6432, release workflow only.
 **Action:** crop the policy screen to the sole User and workflow target; show
-allowed/denied run evidence only when available.
+Policy insights and allowed/denied run evidence only when available.
 **Point:** "Only this account may trigger this release workflow." This explicit
 actor rule is separate from the platform's default event restriction and from
 the behavior of code after an allowed actor starts a run.
 **Observed:** exact active target/actor readback and allowed Steve-Glass runs,
 including the non-publishing cache rehearsal. Denial by a second otherwise
-dispatch-eligible identity remains a gap; an outsider's basic access denial
+eligible identity remains a gap; an outsider's basic access denial
 would not prove this policy.
 **Reset:** leave the policy active. Do not grant access or change policy for a
-recording without separate approval. Final manual dispatch remains a fixed
-`printf` with `permissions: {}` and cannot publish.
+recording without separate approval. Actions policies enforce the restriction
+before jobs start; the workflow needs no no-op job to check it. `release.yml`
+now contains only the publishing job and has no manual trigger. Do not create
+a release or tag movement merely to demonstrate actor eligibility.
 
 ## 5. Release cache isolation: one configuration change
 
@@ -171,8 +173,10 @@ It is not a seeded existing-entry/positive-restore-control experiment. Earlier
 A/B release runs had npm caching disabled and are not evidence for this exact
 combination. No `continue-on-error`, forced cache call, or error masking was added.
 **Reset:** the temporary dispatch steps and read permission were removed in the
-follow-up commit before publishing main. The rehearsal commit/run stay in
-history; do not rerun a release or move tags for validation.
+follow-up commit before publishing main. The remaining no-op policy-check job
+and manual trigger were subsequently removed as unnecessary demo scaffolding.
+The rehearsal commit/run stay in history; do not rerun a release or move tags
+for validation.
 
 ## 6. Consumer CLI locking
 

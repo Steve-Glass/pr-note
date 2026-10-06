@@ -45,7 +45,8 @@ test('release keeps original npm cache configuration with cache-mode none as the
   assert.deepEqual(w.permissions, { contents: 'write' });
   assert.equal(w.concurrency.group, 'release');
   assert.equal(w.concurrency['cancel-in-progress'], false);
-  assert.deepEqual(w.on, { push: { branches: ['main'] }, workflow_dispatch: null });
+  assert.deepEqual(w.on, { push: { branches: ['main'] } });
+  assert.deepEqual(Object.keys(w.jobs), ['publish']);
   const publish = w.jobs.publish;
   assert.match(publish.if, /github.event_name == 'push'/);
   assert.match(publish.if, /github.ref == 'refs\/heads\/main'/);
@@ -58,16 +59,6 @@ test('release keeps original npm cache configuration with cache-mode none as the
   assert.equal(publish['cache-mode'], undefined);
   assert.equal(publish['continue-on-error'], undefined);
   assert.ok(publish.steps.every(step => step['continue-on-error'] === undefined));
-  const check = w.jobs['policy-check'];
-  assert.deepEqual(check, {
-    if: "github.event_name == 'workflow_dispatch'",
-    permissions: {},
-    'runs-on': 'ubuntu-latest',
-    steps: [{
-      name: 'Harmless actor-policy check (never publishes)',
-      run: "printf 'Release actor policy allowed this harmless check; no publication.\\n'",
-    }],
-  });
 });
 
 test('before snapshots remain outside executable workflow discovery', () => {

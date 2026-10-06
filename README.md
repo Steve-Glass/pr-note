@@ -75,7 +75,7 @@ against a local loopback mock, never GitHub or real credentials.
 | --- | --- |
 | `.github/workflows/lint-defaults.yml` | Primary **after**: the same `pull_request_target` trigger and explicit fork-head checkout, with implicit checkout/cache protections. No fork-code execution. |
 | `.github/workflows/lint.yml` | Optional **migration example**: this lint needs no secrets or elevated authority, so it uses `pull_request`, ordinary checkout, and `contents: read`. |
-| `.github/workflows/release.yml` | Serialized publishing with `contents: write`; original `cache: npm` retained, `cache-mode: none` added; harmless manual actor-policy check. |
+| `.github/workflows/release.yml` | Serialized publishing on designated `main` pushes with `contents: write`; original `cache: npm` retained, `cache-mode: none` added. |
 | `demo/before/lint.yml` | **Display only:** the risky checkout-then-execute attack model. Never copy into workflow discovery. |
 | `demo/before/release.yml` | **Display only:** cache-enabled original release structure. Not evidence of an exploit. |
 | `demo/policies/release-only-steve.json` | Desired repository actor policy; not automatically discovered configuration. |
@@ -99,6 +99,8 @@ against a local loopback mock, never GitHub or real credentials.
 4. **Explicit release actor policy.** Only Steve-Glass may trigger
    `.github/workflows/release.yml`. This is an account allowlist for one workflow,
    not the default event policy and not a claim about what allowed code does.
+   Show Actions policies and Policy insights for enforcement and denial evidence;
+   no in-workflow policy-check job is needed.
 5. **Release cache isolation.** Keep `actions/setup-node@v6`, `node-version: 24`,
    and `cache: npm` from the original. The only release-cache configuration
    change is workflow-level `cache-mode: none`; keep `contents: write`.
@@ -148,8 +150,9 @@ The cache inventory was empty before and after, including the exact attempted ke
 
 This was an actual service-denial response, not an inferred miss or a synthetic
 warning. It did not seed a known cache entry or perform a positive restore
-control. The temporary read-only rehearsal steps were removed; manual dispatch
-is again only the fixed policy-check message. No failure suppression was added.
+control. The temporary rehearsal steps, no-op policy-check job, and manual
+trigger have been removed. The historical run remains evidence for this
+combination. No failure suppression was added.
 The earlier A/B release runs disabled npm caching and do not validate this new
 combination. See [DEMO.md](DEMO.md) for precise evidence and recording highlights.
 
@@ -157,9 +160,9 @@ combination. See [DEMO.md](DEMO.md) for precise evidence and recording highlight
 
 Only a `push` to `main` whose commit subject is exactly `release: v3.0.0`
 (A) or `release: v3.0.1` (B) can publish. Ordinary documentation pushes skip
-publishing. Manual `workflow_dispatch` runs only a fixed `printf` job with
-`permissions: {}` and cannot publish. The helper independently rejects dispatch
-and local application.
+publishing. There is no manual trigger or no-op policy-check job. Actions policies
+enforce actor restrictions before jobs start; Policy insights provides denial
+evidence. The helper independently rejects non-push and local application.
 
 `node demo/release.mjs --preview` prints exact tag/release mutations for a clean,
 committed candidate. `release.yml` alone calls `--apply`: create the full-version
@@ -201,7 +204,7 @@ The explicit repository policy is active as
 [policy 6432](https://github.com/Steve-Glass/pr-note/settings/actions/rules/6432);
 its exact target and sole allowed actor were read back on October 6.
 Real fork checkout/default-cache evidence and denial by an otherwise
-dispatch-eligible second actor remain unrehearsed. Do not grant access, create
+eligible second actor remain unrehearsed. Do not grant access, create
 forks, or change policies without approval. A missing prerequisite is a gap,
 not simulated success. The helper does not request Enterprise-only evaluation;
 its explicit active/disabled transitions are separate from the platform's
