@@ -7,8 +7,11 @@ const read = file => parse(readFileSync(new URL(`../${file}`, import.meta.url), 
 
 test('defaults fixture has independent jobs and never executes checked-out PR code', () => {
   const w = read('.github/workflows/lint-defaults.yml');
+  const original = read('demo/before/lint.yml');
   assert.deepEqual(w.on, { pull_request_target: { branches: ['main'] } });
+  assert.deepEqual(w.on, original.on);
   assert.deepEqual(w.permissions, {});
+  assert.deepEqual(w.permissions, original.permissions);
   assert.equal(w['cache-mode'], undefined);
   assert.deepEqual(Object.keys(w.jobs), ['checkout-protection', 'cache-default']);
   const checkout = w.jobs['checkout-protection'];
@@ -16,6 +19,7 @@ test('defaults fixture has independent jobs and never executes checked-out PR co
   assert.equal(checkout.steps.length, 1);
   assert.deepEqual(checkout.steps[0], { uses: 'actions/checkout@v6',
     with: { ref: '${{ github.event.pull_request.head.sha }}', 'persist-credentials': false } });
+  assert.deepEqual(checkout.steps[0], original.jobs.lint.steps[0]);
   const cache = w.jobs['cache-default'];
   assert.equal(cache.needs, undefined);
   assert.equal(cache['cache-mode'], undefined);
@@ -26,15 +30,16 @@ test('defaults fixture has independent jobs and never executes checked-out PR co
   assert.match(cache.steps[1].with.key, /^universe-tru1556m-default-/);
 });
 
-test('improved lint uses pull_request, read-only contents, and ordinary checkout', () => {
+test('optional migration lint uses pull_request, read-only contents, and ordinary checkout', () => {
   const w = read('.github/workflows/lint.yml');
+  assert.equal(w.name, 'Lint (migration example)');
   assert.deepEqual(w.on, { pull_request: { branches: ['main'] } });
   assert.deepEqual(w.permissions, { contents: 'read' });
   assert.deepEqual(w.jobs.test.steps[0].with, { 'persist-credentials': false });
   assert.ok(w.jobs.test.steps.some(step => step.run === 'npm ci && npm test'));
 });
 
-test('release retains publishing authority while removing all cache access', () => {
+test('release keeps original npm cache configuration with cache-mode none as the only cache change', () => {
   const w = read('.github/workflows/release.yml');
   assert.equal(w['cache-mode'], 'none');
   assert.deepEqual(w.permissions, { contents: 'write' });
@@ -46,13 +51,23 @@ test('release retains publishing authority while removing all cache access', () 
   assert.match(publish.if, /github.ref == 'refs\/heads\/main'/);
   assert.match(publish.if, /startsWith\(github.event.head_commit.message, 'release: v'\)/);
   const setup = publish.steps.find(step => step.uses === 'actions/setup-node@v6');
-  assert.deepEqual(setup.with, { 'node-version': 24, 'package-manager-cache': false });
+  const originalSetup = read('demo/before/release.yml').jobs.release.steps
+    .find(step => step.uses === 'actions/setup-node@v6');
+  assert.deepEqual(setup.with, { 'node-version': 24, cache: 'npm' });
+  assert.deepEqual(setup, originalSetup);
   assert.equal(publish['cache-mode'], undefined);
+  assert.equal(publish['continue-on-error'], undefined);
+  assert.ok(publish.steps.every(step => step['continue-on-error'] === undefined));
   const check = w.jobs['policy-check'];
-  assert.deepEqual(check.permissions, {});
-  assert.equal(check.if, "github.event_name == 'workflow_dispatch'");
-  assert.equal(check.steps.length, 1);
-  assert.match(check.steps[0].run, /^printf /);
+  assert.deepEqual(check, {
+    if: "github.event_name == 'workflow_dispatch'",
+    permissions: {},
+    'runs-on': 'ubuntu-latest',
+    steps: [{
+      name: 'Harmless actor-policy check (never publishes)',
+      run: "printf 'Release actor policy allowed this harmless check; no publication.\\n'",
+    }],
+  });
 });
 
 test('before snapshots remain outside executable workflow discovery', () => {

@@ -1,4 +1,5 @@
-name: Lint
+name: Lint (migration example)
+# Optional migration: this lint needs no secrets or elevated authority.
 on:
   pull_request:
     branches: [main]

@@ -13,21 +13,11 @@ concurrency:
 jobs:
   policy-check:
     if: github.event_name == 'workflow_dispatch'
-    permissions:
-      contents: read
+    permissions: {}
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     steps:
       - name: Harmless actor-policy check (never publishes)
         run: printf 'Release actor policy allowed this harmless check; no publication.\n'
-      - uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: npm
-      - run: npm ci --ignore-scripts --no-audit --no-fund
 
   publish:
     if: >-
@@ -43,7 +33,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24
-          package-manager-cache: false
+          cache: npm
       - run: npm ci && npm test
       - run: npm run check:bundle
       - name: Publish version and advance v3

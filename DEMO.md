@@ -1,249 +1,228 @@
 # Demo recording runbook
 
-Record separate clips using harmless inputs; do not perform an actual attack.
-Repository code illustrates the setup. Claim hosted control behavior only
-when real run logs or annotations demonstrate it.
+One original model, shown through separate checkpoints. Use harmless inputs and
+record only measured outcomes as enforcement. A job blocked at one checkpoint
+does not execute later checkpoints; use separate clips, not staged continuation.
 
-Full-version tags are non-retagged by the demo's release helper and operating
-convention, not by platform-enforced release immutability. Published `v3.0.0`
-points to reviewed A, `a53b99fc9738713d0a1d0dba397606f0f0352a98`, and its
-release API reports `immutable: false`. Only `v3` is intentionally movable.
+## Current evidence
 
-## Current checkpoints
-
-| Checkpoint | Status and evidence |
+| Checkpoint | Observed state as of October 6, 2026 |
 | --- | --- |
-| Local Action A, bundle, workflow invariants and helper guards | Verified locally; see `npm test` and `npm run check:bundle`. No real comment posted. |
-| Official checkout fork safety implementation | Source verified at v6 commit `d23441a48e516b6c34aea4fa41551a30e30af803`: `input-helper.ts` calls `assertSafePrCheckout` in `unsafe-pr-checkout-helper.ts`. Native rejection not rehearsed. |
-| Official cache save inputs | Verified `actions/cache/save@v5`, commit `caa296126883cff596d87d8935842f9db880ef25`, inputs `path`/`key`, Node 24. Hosted default warning not rehearsed. |
-| Policy/approval configuration | GET discovery verified; local preview implemented. POST/PUT and Policy insights not rehearsed; separate approval required. |
-| Checkout/default-cache recording | Blocked pending authorized main publication, permitted effective trigger, and a harmless real fork. |
-| Actor-policy denial | Blocked: only Steve-Glass is currently an eligible collaborator. No test access has been granted. |
-| A release and consumer handoff | Implemented, not published. Need separate approval to advance main/create tags and release. |
-| B release | Blocked until consumer locks and successfully runs published A AND user approves B. |
-| Release cache isolation | Configuration implemented; no claim of an observed cache-read denial. |
+| Published Action | `v3.0.0` = A, `a53b99fc9738713d0a1d0dba397606f0f0352a98`; `v3.0.1` and `v3` = B, `47713a3d521b26f4fa13e43fb64b0687c7603980`. Both remain branch-reachable. |
+| Checkout and read-only cache defaults | Fixture implemented; actual fork rejection and default-cache warning not yet captured. |
+| Default event WEP | Current docs describe evaluate/scheduled enforcement; repository API listing returned only the explicit release actor policy. No default-event denial observed. |
+| Explicit release actor WEP | [Policy 6432](https://github.com/Steve-Glass/pr-note/settings/actions/rules/6432) read back active, release-only, sole User `84886334`. Allowed runs observed; no otherwise-eligible second-actor denial. |
+| Release cache isolation | [Run 37483252644](https://github.com/Steve-Glass/pr-note/actions/runs/37483252644): real read/write denial warnings with `cache: npm` and `cache-mode: none`; installation succeeded; publishing skipped. |
+| Consumer locking | Hosted enforcement mismatch remains open in [Steve-Glass/pr-note-consumer#2](https://github.com/Steve-Glass/pr-note-consumer/issues/2). Further native lock replay is paused. |
 
-Recheck official action tags before recording. Never use an unsafe-checkout
-opt-out. No platform defaults or annotations have been verified by a hosted run
-at this handoff; do not substitute unit tests, a same-repo PR, or dispatch.
+Full-version tags are non-retagged by the release helper and operating convention.
+Both published releases report `immutable: false`; this is not platform-enforced
+release immutability. Do not move tags or recreate releases to repeat a clip.
 
-## Off-camera checklist and mutation preview
+## Minimal screen sequence
 
-Use Node 24, local authenticated `gh`, and a private receipt directory outside
-the checkout. Substitute an explicit absolute path for `STATE`:
+Keep the important lines visible; avoid scrolling through setup scripts while
+explaining a control.
+
+| Beat | Screen / lines to highlight |
+| --- | --- |
+| 1. Original model | `demo/before/lint.yml`: `pull_request_target`, explicit head `ref`, then the execution command. `demo/before/release.yml`: `cache: npm` and publishing authority. |
+| 2. Same configuration, secure defaults | `.github/workflows/lint-defaults.yml`: the **same trigger/ref**, then real checkout rejection. Separately show the independent cache job and its default-mode warning. |
+| 3. Default event WEP | Default policy's scope, **actual enforcement state**, `pull_request_target` restriction, and Policy insights if present. Brief optional inset: migration `lint.yml`. |
+| 4. Explicit actor WEP | Policy 6432: **active**, sole User **Steve-Glass / 84886334**, workflow include **`.github/workflows/release.yml`**, empty excludes. |
+| 5. Release cache mode | `.github/workflows/release.yml`: **`cache-mode: none`**; keep `contents: write` and setup-node's original Node 24 / `cache: npm` visible. Then setup/post warnings from the measured run. |
+| 6. Consumer CLI lock | Consumer's official CLI-generated lock and requested-versus-executed SHA evidence. Show the open mismatch instead of claiming success. |
+| 7. Independent external firewall | Consumer's separate network restriction and its own result, not a claimed consequence of locking. |
+
+## 1. Original attack model
+
+**Initial state:** display-only `demo/before` files; simple thank-you Action.
+**Action:** show the two original snapshots, not executable copies of the model.
+**Point:** executing fork-controlled code in a trusted context can affect later
+workflows through shared state. Checkout alone is not execution; the following
+build/test command completes that risk. These files illustrate a model, not an exploit.
+**Evidence:** published [A](https://github.com/Steve-Glass/pr-note/releases/tag/v3.0.0)
+and [B](https://github.com/Steve-Glass/pr-note/releases/tag/v3.0.1) are both benign.
+**Reset:** leave both versions and their history intact.
+
+## 2. Same lint configuration, implicit secure defaults
+
+**Initial state:** the effective policy permits the fixture's trigger; a real,
+harmless fork PR is prepared off camera only with separate approval.
+**Action:** compare the trigger and checkout in `demo/before/lint.yml` with
+`lint-defaults.yml`: both retain `pull_request_target`, `permissions: {}`,
+`actions/checkout@v6`, the explicit PR-head SHA, and `persist-credentials: false`.
+The fixture stops after checkout; it deliberately removes the original
+execution command, not the recognizable trigger/ref configuration.
+**Point:** the first after-state is protection on that same context, **not**
+migration to `pull_request`.
+**Expected evidence:** actual `Refusing to check out fork pull request code...`
+annotation, then the independent cache job's actual read-only warning and
+exact-key cache listing. Current checkout source contains the fork safety check;
+source inspection is not a hosted rejection.
+
+The independent job creates only trusted disposable text. It has no `needs`
+dependency on checkout and deliberately leaves `cache-mode` unspecified.
+It never executes fork code, enables unsafe checkout, or grants cache writes.
+A successful cache job can contain a failed-save warning; success is not proof
+of a saved entry. An empty listing without the relevant warning is insufficient.
+
+**Observed:** fork/default-cache checkpoint not rehearsed.
+**Reset:** a separately approved harmless event gets a new run/attempt key.
+Never substitute a same-repository PR or dispatch for the real fork outcome.
+If WEP blocks the whole run, neither job supplies evidence; do not weaken policy
+or pretend these jobs executed.
+
+## 3. Default event WEP; optional migration inset
+
+**Initial state:** inspect the effective policy and current documentation; do not
+assume a recording date implies an enforced block.
+**Action:** show the platform-default event policy and its actual state, or show
+the documented rollout with an explicit "not observed here" label if absent.
+
+The [authoritative scope](https://docs.github.com/en/actions/reference/security/securely-using-pull_request_target#default-policy-for-pull_request_target),
+checked October 6, is **public repositories without an applicable existing Actions
+event policy**. It excludes private/internal repositories and does not replace
+an applicable event policy. The docs currently describe **evaluate** mode and
+**November 2, 2026** enforcement for affected repositories using that default
+`pull_request_target` policy before general availability. Do not summarize this
+as "all public repositories are blocked today."
+
+**Point:** an enforced event restriction stops the workflow before runner jobs.
+Evaluation/insights about a would-be block are not an actual denial.
+**Observed:** the current repository API lists only the release actor policy.
+That actor allowlist is not an event policy and is not evidence of the default
+event block. No default-event denial has been captured.
+**Reset:** no policy transition is needed for this clip. Leave effective
+platform, parent and repository protections unchanged.
+
+**Optional migration inset:** `lint.yml` is explicitly labeled a migration
+example because this lint needs no secrets or elevated authority. Show ordinary
+checkout under `pull_request` with `contents: read`. Do not call it a universal
+isolation boundary: untrusted code still executes, especially risky on persistent
+self-hosted runners. This example uses ephemeral GitHub-hosted runners.
+PR-scoped caching is not the shared-default-branch cache of the preceding fixture.
+Do not spend this clip on contributor-approval settings or an approve/run flow.
+
+## 4. Distinct explicit release actor policy
+
+**Initial state:** active repository policy 6432, release workflow only.
+**Action:** crop the policy screen to the sole User and workflow target; show
+allowed/denied run evidence only when available.
+**Point:** "Only this account may trigger this release workflow." This explicit
+actor rule is separate from the platform's default event restriction and from
+the behavior of code after an allowed actor starts a run.
+**Observed:** exact active target/actor readback and allowed Steve-Glass runs,
+including the non-publishing cache rehearsal. Denial by a second otherwise
+dispatch-eligible identity remains a gap; an outsider's basic access denial
+would not prove this policy.
+**Reset:** leave the policy active. Do not grant access or change policy for a
+recording without separate approval. Final manual dispatch remains a fixed
+`printf` with `permissions: {}` and cannot publish.
+
+## 5. Release cache isolation: one configuration change
+
+**Initial state:** retain the original setup-node configuration. Highlight the
+workflow-level setting:
+
+```yaml
+permissions:
+  contents: write
+cache-mode: none
+```
+
+Keep this unchanged publishing-job step visible alongside it:
+
+```yaml
+- uses: actions/setup-node@v6
+  with:
+    node-version: 24
+    cache: npm
+```
+
+**Action:** highlight only `cache-mode: none` as the release-cache change from
+`demo/before/release.yml`. Leave `cache: npm` visible; there is no
+`package-manager-cache: false` in this release path. Other pre-existing release
+guards are not part of this cache comparison. The mode is a workflow key, not
+an input or `permissions` entry. `read` would still allow restores.
+**Point:** retain publishing authority while independently removing cache access.
+
+**Measured evidence:** [run 37483252644](https://github.com/Steve-Glass/pr-note/actions/runs/37483252644),
+`workflow_dispatch` on `steve-glass-universe-producer-demo`,
+commit `d143b954dbd6f77619655b73ee48748a5a20479f`. The temporary `policy-check`
+job had `contents: read`, `cache-mode: none`, checkout with
+`persist-credentials: false`, setup-node Node 24 / `cache: npm`, and bounded
+`npm ci --ignore-scripts --no-audit --no-fund`. No publishing steps ran.
+
+- Setup: `Failed to restore: ... (403) Forbidden: cache read denied: token has no readable scopes`.
+- Post: `Failed to save: Unable to reserve cache with key ... More details: cache write denied: token has no writable scopes`.
+- Installation and the job succeeded; `publish` was skipped. The cache inventory
+  was empty before/after, including the exact attempted key.
+
+The run resolved checkout v6 to `d23441a48e516b6c34aea4fa41551a30e30af803`
+and setup-node v6 to `249970729cb0ef3589644e2896645e5dc5ba9c38`.
+That distributed setup-node bundle uses best-effort cache error handling and
+reports these service-denial warnings. It does **not** contain the newer
+toolkit source's mode-based skip path. Record the actual action revision/output;
+do not promise that a later action version will emit identical warnings.
+
+This demonstrates actual denied cache requests and continued installation.
+It is not a seeded existing-entry/positive-restore-control experiment. Earlier
+A/B release runs had npm caching disabled and are not evidence for this exact
+combination. No `continue-on-error`, forced cache call, or error masking was added.
+**Reset:** the temporary dispatch steps and read permission were removed in the
+follow-up commit before publishing main. The rehearsal commit/run stay in
+history; do not rerun a release or move tags for validation.
+
+## 6. Consumer CLI locking
+
+**Initial state:** existing published A/B; `v3` currently points to B.
+**Action:** use the consumer's CLI/lock artifacts as the intended control,
+then distinguish CLI validation from the SHA actually used by a hosted runner.
+**Point:** a dependency lock is intended to bind resolution to a reviewed commit;
+the label in a workflow alone does not establish enforcement.
+**Observed:** the native hosted mismatch is open in
+[Steve-Glass/pr-note-consumer#2](https://github.com/Steve-Glass/pr-note-consumer/issues/2).
+Do not say "the consumer stays on A" as an achieved outcome while that issue is
+unresolved. Further CLI replay, comments and lock changes are paused.
+**Reset:** none in this producer update; preserve the existing lock and tags.
+
+## 7. Independent external firewall
+
+**Initial state:** the consumer's separate network-control configuration.
+**Action:** show that control and its own measured result after the CLI segment.
+**Point:** dependency resolution and network containment are independent controls.
+A cache warning or a CLI-valid lock does not prove external traffic was blocked.
+**Observed:** defer to the consumer's evidence; no firewall probe is run by this
+producer update. Never send credentials or simulate a successful denial.
+**Reset:** no consumer/network changes are authorized here.
+
+## Off-camera reference
+
+Read-only checks and local validation:
 
 ```sh
-export STATE=/absolute/path/outside/checkout/pr-note-demo
 node demo/preflight.mjs
-npm ci && npm test && npm run check:bundle
-node demo/settings.mjs policy preview "$STATE/policy.json"
-node demo/settings.mjs approval preview "$STATE/approval.json"
-node demo/release.mjs --preview
+npm test && npm run check:bundle
+gh api --paginate 'repos/Steve-Glass/pr-note/actions/policies?has_parents=true&per_page=100'
+gh api repos/Steve-Glass/pr-note/actions/policies/6432
+gh run view 37483252644 --repo Steve-Glass/pr-note --log
+gh api --paginate 'repos/Steve-Glass/pr-note/actions/caches?per_page=100'
 ```
 
-Previews issue GETs only, save exact prior state locally, and print mutations.
-Inspect **all** inherited/current policy details and Rules/Actions settings.
-The default public `pull_request_target` policy has a date-dependent rollout:
-on discovery, the API returned zero policies; this does not establish how the
-next run will be treated. If a parent/platform policy blocks the fixture, stop
-and report that blocker. Do not weaken it or create an event allowlist.
+For future approved defaults evidence, use
+`universe-tru1556m-default-RUN_ID-ATTEMPT`; for the measured release-cache
+rehearsal the exact key is
+`node-cache-Linux-x64-npm-36d14074ed885f81a5d6d0c9794d4e8a529c803cec476b8f833e8ef8686f93c9`.
+Retained cache/policy identifiers are technical references, not presentation branding.
 
-The concrete setup preview is:
+The existing `all_external_contributors` approval setting is secondary background
+only. It does not gate `pull_request_target`. Leave it configured; no settings
+screen or approve/run walkthrough is needed in the core recording.
 
-| Resource | Approved mutation would do |
-| --- | --- |
-| Producer code on `main` | Fast-forward reviewed A commit to main; its `release: v3.0.0` subject triggers release publishing. Session-branch push alone does not publish. |
-| A publication | POST `git/refs` for full-version tag `refs/tags/v3.0.0` at A; `gh release create v3.0.0 --verify-tag`; POST `git/refs` for `refs/tags/v3` at A. |
-| Release policy | POST `/repos/Steve-Glass/pr-note/actions/policies` with the exact body in `demo/policies/release-only-steve.json`; no other policies changed. |
-| Fork approval | PUT `/repos/Steve-Glass/pr-note/actions/permissions/fork-pr-contributor-approval` with `{"approval_policy":"all_external_contributors"}`; prior value observed: `first_time_contributors`. |
-| Harmless rehearsals | Separately approve real fork/PR/comment creation and release dispatches. No grants, events, or forks are produced by setup/tests. |
-
-All API calls use `X-GitHub-Api-Version: 2026-03-10`. API schema and admin reads
-are available; an actual write may still fail due to permissions/feature access.
-Surface its exact error and stop, without claiming configuration succeeded.
-
-**Only after approval of each displayed mutation:**
-
-```sh
-node demo/settings.mjs policy apply "$STATE/policy.json"
-node demo/settings.mjs approval apply "$STATE/approval.json"
-# After explicit main/release approval, from the clean reviewed A checkout:
-git push origin HEAD:refs/heads/main
-# A release workflow runs automatically; wait for its actual result.
-gh run list --repo Steve-Glass/pr-note --workflow release.yml --limit 5
-```
-
-Do not rerun the main push to manufacture evidence. A policy denial means no
-jobs ran; it is not evidence of checkout/cache protections.
-
-The settings helper refuses duplicate/foreign name matches, identity mismatch,
-changed rules/targets, concurrent state changes, and uncertain write retries.
-It saves the prior state, returned policy ID, and readback outside Git. Restore
-only that transaction:
-
-```sh
-node demo/settings.mjs approval restore-preview "$STATE/approval.json"
-node demo/settings.mjs policy restore-preview "$STATE/policy.json"
-# Review these previews and obtain reset approval before applying:
-node demo/settings.mjs approval restore "$STATE/approval.json"
-node demo/settings.mjs policy restore "$STATE/policy.json"
-```
-
-A newly created demo policy is deleted on restore; a pre-existing matching policy
-is restored to its original fields/enforcement. Unrelated/inherited policies
-are never changed. For an approved active/disabled rehearsal of an existing
-demo policy, use `policy preview-disabled "$STATE/disabled.json"`, then `apply`,
-then `restore-preview`/`restore` with that same separate receipt. This is **not**
-evaluation. Do not reuse a stale outer receipt after another transaction has
-updated the policy: inspect and reconcile it rather than bypassing the guard.
-No `evaluate` path is implemented because this account's entitlement is unproven.
-
-These APIs do not document atomic compare-and-swap. The helper compares complete
-snapshots immediately before mutation and reads back afterward, but cannot
-eliminate a simultaneous administrator write during the request. Use one setup
-operator and no concurrent policy/tag editors. If a request fails after submission,
-the `mutation-pending` receipt is intentionally not retried; reconcile its saved
-response/ID against GET results first.
-
-### Settings-only fork approval highlight
-
-The supported API above exists. UI equivalent (and fallback if that API is
-unavailable): open `Steve-Glass/pr-note` > **Settings > Actions > General** >
-**Approval for running fork pull request workflows from contributors**. Record
-the original selection, select **Require approval for all external contributors**,
-and **Save**, only after approval. Reopen to verify; restore the original
-selection to reset. Do not change adjacent token, fork-secret, or Actions-allow
-settings. Record the setting only: **no recorded fork creation, awaiting-approval
-screen, or approve-and-run flow**. This gate does not apply to `pull_request_target`.
-
-## Clip 1: establish the model and benign A
-
-**Initial state:** reviewed A code and display-only `demo/before` snapshots;
-published A only after authorization.
-**Action / screen:** show the simple Action, its default note, and the original
-lint/release files outside `.github/workflows`. Show A's consumer output if ready.
-**Narration:** "I'm using a harmless thank-you Action. These original files
-illustrate a trust-boundary mistake; I am not performing an attack."
-**Expected:** `demo-revision: A` with the unchanged thank-you comment.
-**Observed evidence:** local behavior verified; actual release and consumer run
-links pending. **Reset:** retain A's branch and full-version tag; never overwrite A.
-
-## Clip 2: two independent secure defaults
-
-**Initial state:** `lint-defaults.yml` on main; effective policy allows the
-trigger; a harmless real fork contribution prepared **off camera** with approval.
-It need only change a text file; never add or execute a payload.
-**Action / screen:** show the real fork run's checkout failure annotation and
-the independent cache-save warning, even if the overall run failed.
-**Narration:** "Checkout refuses the fork's code in this trusted context. A
-separate job also cannot save to the shared cache under the default policy."
-**Expected:** actual `Refusing to check out fork pull request code...` error;
-actual read-only cache warning and zero entries for the exact unique key.
-**Observed evidence:** not rehearsed; retain run URL, annotation, warning text,
-job conclusions and cache listing. No fork identity/namespace has been selected.
-**Reset:** use a new run/attempt key for another approved harmless event; close
-only the demo PR after approved cleanup. Never grant cache writes.
-
-Read-only capture, substituting the actual run ID and attempt:
-
-```sh
-gh run view RUN_ID --repo Steve-Glass/pr-note --log
-gh api --paginate \
-  'repos/Steve-Glass/pr-note/actions/caches?key=universe-tru1556m-default-RUN_ID-ATTEMPT&per_page=100'
-```
-
-A successful cache job is not proof of a save. Zero entries without the relevant
-warning is also insufficient. If execution policy denies the run, **neither**
-job proves its protection; resolve the prerequisite without weakening protections.
-
-## Clip 3: improved lint and the separate approval setting
-
-**Initial state:** ordinary `lint.yml` and an approved harmless PR rehearsal.
-**Action / screen:** compare `demo/before/lint.yml` to `.github/workflows/lint.yml`;
-show a real successful lint run. Then show only the approval setting above.
-**Narration:** "I use ordinary pull-request CI with read-only contents. External
-fork workflows have an additional approval gate; that is a separate setting."
-**Expected:** ordinary checkout and successful install/tests; no claim of the
-shared-default-cache warning on this PR-scoped run.
-**Observed evidence:** not rehearsed; save lint URL and settings readback.
-**Reset:** close the approved demo PR; restore the setting only if approved.
-
-## Clip 4: release actor allowlist
-
-**Initial state:** active Steve-Glass-only policy targeting `release.yml`; a
-second **otherwise dispatch-eligible** identity arranged with explicit approval.
-**Action / screen:** show policy path and sole User, then real denied/allowed
-manual checks and Policy insights where available.
-**Narration:** "This policy allows only me to trigger this release workflow.
-It doesn't determine what code does after an allowed trigger."
-**Expected:** the allowed account's fixed harmless check runs; the eligible second actor is
-denied by this policy, with no publishing in either dispatch.
-**Observed evidence:** blocked by missing second identity; basic access denial
-from an outsider is not policy evidence. Do not grant access automatically.
-**Reset:** restore only the demo policy from the reviewed receipt if approved.
-
-After stimulus approval, each identity uses its own authenticated session:
-
-```sh
-gh workflow run release.yml --repo Steve-Glass/pr-note --ref main
-```
-
-Record actor eligibility as well as the actual policy denial, not merely a failed
-dispatch response. A successful denied-actor baseline under an explicitly approved
-disabled demo policy can establish eligibility; disabled is not evaluation.
-Do not weaken any parent policy for that baseline.
-
-## Clip 5: release cache isolation
-
-**Initial state:** release workflow on main with `contents: write`,
-`cache-mode: none`, no explicit/automatic npm caching.
-**Action / screen:** compare `demo/before/release.yml` with release.yml; show the
-successful authorized release's setup/publish logs.
-**Narration:** "Publishing still needs write permission. I separately remove all
-cache access, including restores, from this release workflow."
-**Expected:** publishing succeeds without service cache restores/saves.
-**Observed evidence:** configuration implemented; hosted publishing not rehearsed.
-Do not call absence of a cache step a measured service denial.
-**Reset:** no extra cache data exists from this path; do not delete version tags.
-
-If an actual cache-read denial clip is wanted, obtain separate approval for an
-isolated probe workflow, a known benign entry and a successful positive restore
-control in the same branch scope, followed by restore under `cache-mode: none`.
-Keep that scaffolding outside the main release view. It is not implemented or
-claimed as measured here; a cold-cache miss is not proof of isolation.
-
-## Clip 6: reviewed A handoff; stop before B
-
-**Initial state:** successful authorized A release and consumer onboarding.
-**Action / screen:** record published version `v3.0.0`, mutable `v3`, reachable A branch,
-producer run, and consumer's native lock plus successful A run.
-**Narration:** "Both tags resolve to A. The consumer locks this exact commit
-and has successfully executed it."
-**Expected:** one full A SHA across tag resolutions and consumer lock; marker A.
-**Observed evidence:** not yet available; coordinator must receive the real SHA,
-tag/ref readbacks, producer run URL and consumer run URL before B.
-**Reset:** preserve A history and tags. Never substitute a made-up SHA or lockfile.
-
-```sh
-gh api repos/Steve-Glass/pr-note/git/ref/tags/v3.0.0
-gh api repos/Steve-Glass/pr-note/git/ref/tags/v3
-gh run list --repo Steve-Glass/pr-note --workflow release.yml --limit 5
-```
-
-## Clip 7: benign B moves the alias; consumer stays on A
-
-**Initial state:** consumer confirms locked/successful A AND user approves B.
-**Action / screen:** on an A-descendant producer branch, change only
-`DEMO_REVISION = 'A'` to `'B'`; run `npm version 3.0.1 --no-git-tag-version`,
-`npm run build`, `npm test`, and `npm run check:bundle`. Review the diff, commit
-with subject `release: v3.0.1`, preview via `node demo/release.mjs --preview`,
-then publish to main only within that approval. Record `v3` resolving to B
-while the consumer still executes A, then its separate firewall probe.
-**Narration:** "I moved the alias to a second benign version. The lock keeps
-the consumer on A; its separate firewall check demonstrates containment without
-sending credentials."
-**Expected:** full-version tag `v3.0.0` remains A; `v3.0.1` and `v3` resolve to B;
-consumer's locked run still logs A.
-**Observed evidence:** blocked until the two explicit gates above; do not publish B now.
-**Reset:** keep both versions branch-reachable. Never retag full-version tags;
-any deliberate alias reset needs its own reviewed approval and readback.
+`demo/settings.mjs` still supports scoped previews/apply/readback/restore for the
+explicit policy and approval setting, with receipts outside Git. Use it only
+with separate approval. Preserve prior state, do not overwrite concurrent changes,
+and do not change inherited/platform policies. Its active/disabled operations
+are not evaluation. The API has no documented atomic compare-and-swap; use one
+operator and reconcile uncertain writes rather than retry blindly.
