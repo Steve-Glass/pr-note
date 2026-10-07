@@ -63,9 +63,30 @@ test('release keeps original npm cache configuration with cache-mode none as the
 
 test('before snapshots remain outside executable workflow discovery', () => {
   assert.deepEqual(readdirSync(new URL('../.github/workflows/', import.meta.url)).sort(),
-    ['lint-defaults.yml', 'lint.yml', 'release.yml']);
+    ['lint-defaults.yml', 'lint.yml', 'release.yml', 'zizmor.yml']);
   assert.equal(read('demo/before/lint.yml').on.pull_request_target.branches[0], 'main');
   assert.equal(read('demo/before/release.yml').jobs.release.steps[1].with.cache, 'npm');
+});
+
+test('static analysis reports findings without running project code or changing demo controls', () => {
+  const w = read('.github/workflows/zizmor.yml');
+  assert.deepEqual(w.on, {
+    push: { branches: ['main'] },
+    pull_request: { branches: ['main'] },
+  });
+  assert.deepEqual(w.permissions, {});
+  assert.deepEqual(Object.keys(w.jobs), ['zizmor']);
+  const job = w.jobs.zizmor;
+  assert.equal(job['runs-on'], 'ubuntu-latest');
+  assert.equal(job['timeout-minutes'], 10);
+  assert.deepEqual(job.permissions, { contents: 'read', 'security-events': 'write' });
+  assert.equal(job['continue-on-error'], undefined);
+  assert.equal(job.steps.length, 2);
+  assert.match(job.steps[0].uses, /^actions\/checkout@[a-f0-9]{40}$/);
+  assert.deepEqual(job.steps[0].with, { 'persist-credentials': false });
+  assert.match(job.steps[1].uses, /^zizmorcore\/zizmor-action@[a-f0-9]{40}$/);
+  assert.deepEqual(job.steps[1].with, { version: '1.30.1', 'advanced-security': true });
+  assert.ok(job.steps.every(step => step.run === undefined && step['continue-on-error'] === undefined));
 });
 
 test('Action metadata matches shared contract and policy targets only the release User', () => {

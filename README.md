@@ -76,9 +76,35 @@ against a local loopback mock, never GitHub or real credentials.
 | `.github/workflows/lint-defaults.yml` | Primary **after**: the same `pull_request_target` trigger and explicit fork-head checkout, with implicit checkout/cache protections. No fork-code execution. |
 | `.github/workflows/lint.yml` | Optional **migration example**: this lint needs no secrets or elevated authority, so it uses `pull_request`, ordinary checkout, and `contents: read`. |
 | `.github/workflows/release.yml` | Serialized publishing on designated `main` pushes with `contents: write`; original `cache: npm` retained, `cache-mode: none` added. |
+| `.github/workflows/zizmor.yml` | Static analysis of discovered workflows and Action metadata on `main` pushes and PRs, with findings in Security > Code scanning. |
 | `demo/before/lint.yml` | **Display only:** the risky checkout-then-execute attack model. Never copy into workflow discovery. |
 | `demo/before/release.yml` | **Display only:** cache-enabled original release structure. Not evidence of an exploit. |
 | `demo/policies/release-only-steve.json` | Desired repository actor policy; not automatically discovered configuration. |
+
+## Workflow static analysis
+
+[zizmor](https://github.com/zizmorcore/zizmor) runs through its official,
+commit-pinned Action using analyzer version 1.30.1. It reads workflow and Action
+definitions without installing project dependencies or executing project code.
+Only the analysis job receives `contents: read` and `security-events: write`;
+the latter uploads results to **Security > Code scanning**, not repository code.
+
+The scan deliberately includes the executable demo workflows. Findings about
+their `pull_request_target` trigger and tag-based Action references remain
+visible; this integration neither suppresses them nor rewrites the demo.
+Display-only files under `demo/before/` are not discovered as active workflows.
+In this reporting mode, findings do not fail the analysis job; tool or upload
+errors still do. A successful scan is not a clean security verdict or proof of
+the platform protections demonstrated separately. No merge rules are changed.
+
+To inspect the same local inputs with zizmor 1.30.1 installed:
+
+```sh
+zizmor --offline --strict-collection .
+```
+
+The plain local command exits nonzero when it reports findings. CI additionally
+uses the official Action's online audits and uploads SARIF for triage.
 
 ## Demo flow
 
